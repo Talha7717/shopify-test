@@ -1,0 +1,415 @@
+
+
+
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use GuzzleHttp\Client;
+use App\Models\ShippingPhotoComment;
+use App\Mail\TestEmail;
+use Illuminate\Support\Facades\Storage;
+
+
+class ViewController extends Controller
+{
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function index()
+    {
+        return view('welcome');
+    }
+
+
+
+    public function custom_url()
+    {
+        
+        $graphqlEndpoint = 'https://miraiclinical.myshopify.com/admin/api/2024-04/graphql.json';
+        
+        // GraphQL query to fetch all orders
+        $queryFetchOrders = <<<'GRAPHQL'
+        {
+          orders(first: 10) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }
+        GRAPHQL;
+        
+        // Mutation to add Shopify note to order
+        $mutationAddShopifyNote = <<<'GRAPHQL'
+        mutation AddShopifyNote($input: OrderInput!) {
+          orderUpdate(input: $input) {
+            order {
+              id
+              customAttributes {
+                key
+                value
+              }
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        GRAPHQL;
+        
+        // Make GraphQL request to fetch orders
+        $client = new Client();
+        $response = $client->post($graphqlEndpoint, [
+          'headers' => [
+            'X-Shopify-Access-Token' => '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', // Access Token
+            'X-Shopify-Api-Key' => 'c9019ac9a7ae6d4fe320439671636124', // API Key
+            'Content-Type' => 'application/json',
+          ],
+          'json' => [
+            'query' => $queryFetchOrders,
+          ],
+        ]);
+        
+        // Process response to fetch orders
+        $data = json_decode($response->getBody()->getContents(), true);
+        
+        // Iterate over orders and add Shopify notes
+        foreach ($data['data']['orders']['edges'] as $order) {
+          $orderId = $order['node']['id'];
+          $note = "This is a Shopify note added via GraphQL for order ID: $orderId";
+        
+          // Make GraphQL request to add Shopify note
+          $response = $client->post($graphqlEndpoint, [
+            'headers' => [
+              'X-Shopify-Access-Token' => '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', // Access Token
+              'X-Shopify-Api-Key' => 'c9019ac9a7ae6d4fe320439671636124', // API Key
+              'Content-Type' => 'application/json',
+            ],
+            'json' => [
+              'query' => $mutationAddShopifyNote,
+              'variables' => [
+                'input' => [
+                  'id' => $orderId,
+                  'customAttributes' => [
+                    [
+                      'key' => 'NAME',
+                      'value' => addslashes($note),
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ]);
+        
+          // Process response for adding Shopify note (optional)
+          $noteResponse = json_decode($response->getBody()->getContents(), true);
+        }
+        
+        // Additional processing if needed
+    
+        dd($noteResponse);
+        // Additional processing if needed
+
+
+
+
+        $shippingPhotoComments = ShippingPhotoComment::all();
+        return view('custom_url', ['shippingPhotoComments' => $shippingPhotoComments]);
+
+        // // Your Shopify store's credentials
+        // $shopUrl = 'a7ff35-8b.myshopify.com';
+        // $apiKey = '79a1c757b50ea271fa203217efdb7906';
+        // //access token //my_liveapp
+        // $password = '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';
+
+
+
+
+
+        // // Your Shopify store's credentials
+        // $shopUrl = 'product-custom-field.myshopify.com';
+        // $apiKey = 'cad382d2aeb5eda1497e835faa8571b5';
+        // //access token //testing_dev_app
+        // $password = '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';
+
+
+
+
+        // // Replace these with your actual credentials
+        // $shop = "product-custom-field.myshopify.com";
+        // $apiKey = "cad382d2aeb5eda1497e835faa8571b5";
+        // $password = "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";
+        
+        // // Build the API URL
+        // $url = "https://$shop/admin/api/2024-04/events.json";
+        
+        // // Create a basic authentication header
+        // $authorization = base64_encode("$apiKey:$password");
+        
+        // // Initialize cURL
+        // $curl = curl_init($url);
+        
+        // // Set cURL options
+        // curl_setopt_array($curl, array(
+        //   CURLOPT_RETURNTRANSFER => true,
+        //   CURLOPT_SSL_VERIFYPEER => false,
+        //   CURLOPT_SSL_VERIFYHOST => false,
+        //   CURLOPT_HTTPHEADER => array(
+        //     "Authorization: Basic $authorization",
+        //     "Content-Type: application/json"
+        //   )
+        // ));
+        
+        // // Execute the request and get the response
+        // $response = curl_exec($curl);
+        
+        // // Check for errors
+        // if (curl_errno($curl)) {
+        //   echo 'Error: ' . curl_error($curl);
+        //   die();
+        // }
+        
+        // // Close the cURL connection
+        // curl_close($curl);
+        
+        // // Decode the JSON response
+        // $data = json_decode($response, true);
+        
+        // // Initialize an empty array to store comment events
+        // $commentEvents = [];
+        
+        // // Loop through all events
+        // if (isset($data['events'])) {
+        //   foreach ($data['events'] as $event) {
+        //     // Check if it's a comment event (modify based on Shopify's documentation)
+        //     if ($event['verb'] === 'comment_created') {
+        //       $commentEvents[] = $event;
+        //     }
+        //   }
+        // }
+        
+        // // Sort comment events by created_at (assuming the property exists)
+        // usort($commentEvents, function($a, $b) {
+        //   return strtotime($a['created_at']) - strtotime($b['created_at']);
+        // });
+        
+        // // Now you have the comment events sorted by timeline in $commentEvents
+        
+        // // You can access details of each comment event using $commentEvents array
+        
+        // echo "Total Comment Events: " . count($commentEvents) . PHP_EOL;
+        
+        // // Example: Print details of the first comment event
+        // if (isset($commentEvents[0])) {
+        //   $firstComment = $commentEvents[0];
+        //   echo "First Comment Event:" . PHP_EOL;
+        //   echo "  - Message: " . $firstComment['message'] . PHP_EOL;
+        //   echo "  - Created at: " . $firstComment['created_at'] . PHP_EOL;
+        // }
+        
+        
+        
+
+
+
+
+        // // Construct the API endpoint
+        // $endpoint = "https://$shopUrl/admin/api/2024-04/events.json";
+
+        // // Initialize cURL session
+        // $curl = curl_init($endpoint);
+
+        // // Set cURL options
+        // curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        // curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
+        // curl_setopt($curl, CURLOPT_USERPWD, "$apiKey:$password");
+        // // Verify SSL peer
+        // curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+
+        // // Execute cURL request
+        // $response = curl_exec($curl);
+        // $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        // $events = json_decode($response, true)['events'];
+
+        // dd($events);
+
+        // // Check if request was successful
+        // if ($http_status === 200) {
+        //     // Decode the JSON response
+        //     $events = json_decode($response, true)['events'];
+        //     // Filter events related to comments
+        //     $commentEvents = array_filter($events, function($event) {
+        //         return $event['subject_type'] === 'Comment';
+        //     });
+        //     // Sort events by timestamp
+        //     usort($commentEvents, function($a, $b) {
+        //         return strtotime($a['created_at']) - strtotime($b['created_at']);
+        //     });
+        //     // Output sorted comment events
+        //     print_r($commentEvents);
+        // } else {
+        //     // Output error message if request failed
+        //     echo "Failed to retrieve events. HTTP Status: $http_status\n";
+        //     echo "Response: $response\n";
+        // }
+
+        // // Close cURL session
+        // curl_close($curl);
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // dd(" -------------------------- ");
+        // // Shopify GraphQL Endpoint
+        // $graphqlEndpoint = 'https://miraiclinical.myshopify.com/admin/api/2024-04/graphql.json';
+
+        // $query = <<<'GRAPHQL'
+        // {
+        //     orders(first: 10, query: "created_at:>2024-01-01T00:00:00Z AND created_at:<2024-05-01T00:00:00Z") {
+        //       edges {
+        //         node {
+        //           id
+        //           name
+        //           createdAt
+        //           totalPriceSet {
+        //             shopMoney {
+        //               amount
+        //               currencyCode
+        //             }
+        //           }
+        //           lineItems(first: 5) {
+        //             edges {
+        //               node {
+        //                 title
+        //                 quantity
+        //                 variant {
+        //                   title
+        //                   price
+        //                 }
+        //               }
+        //             }
+        //           }
+        //         }
+        //       }
+        //     }
+        //   }
+          
+        // GRAPHQL;
+    
+        // // Make GraphQL Request
+        // $client = new Client();
+        // $response = $client->post($graphqlEndpoint, [
+        //     'headers' => [
+        //         'X-Shopify-Access-Token' => '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', // Access Token
+        //         'X-Shopify-Api-Key' => 'c9019ac9a7ae6d4fe320439671636124', // API Key
+        //         'Content-Type' => 'application/json',
+        //     ],
+        //     'json' => [
+        //         'query' => $query,
+        //     ],
+        // ]);
+
+        // // Process Response
+        // $data = json_decode($response->getBody()->getContents(), true);
+
+        // dd($data);
+
+
+
+        // $orders = $data['data']['orders']['edges'];
+
+
+        // foreach ($orders as $order) {
+        //     $orderData = $order['node'];
+        //     if (!isset($orderData['events'])) {
+        //         return response()->json("NO testing");
+        //         continue; // Skip if no events
+        //     }
+        
+        //     $lastShippingPhotoEvent = null; // Variable to store the last Shipping Photo event
+        
+        //     foreach ($orderData['events']['edges'] as $event) {
+        //         $eventData = $event['node'];
+        //         if ($eventData['__typename'] === 'CommentEvent') {
+        //             $message = $eventData['message'];
+        //             if (strpos($message, 'Shipping Photo') !== false) { // Check for tag
+        //                 $lastShippingPhotoEvent = $eventData; // Store the event data
+        //             }
+        //         }
+        //     }
+        //     if ($lastShippingPhotoEvent !== null) { // If a Shipping Photo event was found
+        //         // Get the index of the last attachment
+        //         $lastIndex = count($lastShippingPhotoEvent['attachments']) - 1;
+        //         // Fetch the URL and name of the last attachment
+        //         $attachment_url = $lastShippingPhotoEvent['attachments'][$lastIndex]['url'];
+        //         $attachment_name = $lastShippingPhotoEvent['attachments'][$lastIndex]['name'];
+        //         // Get the file contents from the URL
+        //         $fileContents = file_get_contents($attachment_url);
+        //         $filename = basename($attachment_name);
+        //         $path = Storage::disk('local')->put($filename, $fileContents);
+        
+        //         // Fetch customer data
+        //         $customerData = $orderData['customer'];
+        //         $customerName = $customerData['firstName'] . ' ' . $customerData['lastName'];
+        //         $customerEmail = $customerData['email'];
+        
+        //         // Check if OrderID already exists
+        //         $existingRecord = ShippingPhotoComment::where('order_id', $orderData['name'])->first();
+        
+        //         if (!$existingRecord) {
+        //             // OrderID does not exist, create new record
+        //             ShippingPhotoComment::create([
+        //                 'order_id' => $orderData['name'],
+        //                 'username' => $customerName,
+        //                 'user_email' => $customerEmail,
+        //                 'attachment_url' => $attachment_url,
+        //             ]);
+        //         } else {
+        //             // OrderID already exists, handle as needed (e.g., update existing record)
+        //             // You can add code here to update existing records if necessary
+        //             $existingRecord->update(['attachment_url' => $attachment_url]);
+        //         }
+        //     }
+        // }
+        
+
+        // $shippingPhotoComments = ShippingPhotoComment::all();
+        // return view('custom_url', ['shippingPhotoComments' => $shippingPhotoComments]);
+    }
+
+}
+
