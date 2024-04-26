@@ -21,10 +21,6 @@
                                         <label for="product_name">Product Name</label>
                                         <input type="text" class="form-control" id="product_name" name="product_name" required>
                                     </div>
-                                    <!-- <div class="form-group">
-                                        <label for="product_image">Product Image</label>
-                                        <input type="file" class="form-control-file" id="product_image" name="product_image" required>
-                                    </div> -->
                                     <div class="form-group">
                                         <label for="product_price">Product Price</label>
                                         <input type="number" step="0.01" class="form-control" id="product_price" name="product_price" required>
@@ -72,8 +68,6 @@
                         @endforeach
                     </div>
                     <!-- End of existing list view with cards -->
-
-
                 </div>
             </div>
         </div>

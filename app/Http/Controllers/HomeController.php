@@ -110,7 +110,6 @@ class HomeController extends Controller
 
     public function order_list(Request $request)
     {
-        // $graphqlEndpoint = 'https://miraiclinical.myshopify.com/admin/api/2024-04/graphql.json';
         $graphqlEndpoint = 'https://'.env('SHOPIFY_STORE').'/admin/api/2023-10/graphql.json'; // Update with your shop URL and API version
 
         $query = <<<'GRAPHQL'
@@ -210,48 +209,5 @@ class HomeController extends Controller
                 }
         }
         return view('order_grid', ['orders' => $orders]);
-
-
-        
-        
-        //   
-        //   
-            
-        //     // $lastShippingPhotoEvent = null; // Variable to store the last Shipping Photo event
-        //     if ($lastShippingPhotoEvent !== null) { // If a Shipping Photo event was found
-        //         // Get the index of the last attachment
-        //         // Get the file contents from the URL
-        //         // $fileContents_base = file_get_contents($attachment_url);
-        //         // $filename = basename($attachment_name);
-        //         // $path = Storage::disk('public')->put('images/' . $filename, $fileContents_base);
-                
-        //         // Get the full URL to the stored image
-        //         // $imageUrl = asset('storage/' . $imagePath);
-        //         // $getFile = asset('storage/images/'.$attachment_name);
-        //         // $attachmentData = Storage::disk('images')->get('aoyD9J1uidQm4RmxUapIzgrhLrQFEpL6BtHGJDZs.png');
-        //         // $fileContents = file_get_contents($attachmentData);
-        //         // $attachment_name = 'images/qrcode.png'; // Ensure the correct path
-        //         // $attachmentData = Storage::disk('public')->get($attachment_name);
-        //         // $imageInfo = getimagesizefromstring($attachmentData);
-                
-                
-
-                
-    
-                    
-        //         // } else {
-        //         //     // OrderID already exists, handle as needed (e.g., update existing record)
-        //         //     // You can add code here to update existing records if necessary
-        //         //     $existingRecord->update(['attachment_url' => $attachment_name]);
-        //         // }
-                
-        //         //--------------------------------------------------------------------------
-        //         // Load all record whose email is not sent yet!
-        //         // $sendEmailToTheseOrders = ShopifyOrders::where('email_sent', 0)->get();
-        //         //---------------------------------------------------------------------------
-                
-        //     }
-        // }
-
     }
 }
