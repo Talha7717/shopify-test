@@ -175,7 +175,7 @@ return [
     |
     */
 
-	'api_key' => env('SHOPIFY_API_KEY', '44e768ebc8d82392323c59dd340f6a7f'),
+	'api_key' => env('SHOPIFY_API_KEY', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -187,7 +187,7 @@ return [
     */
 
 
-	 'api_secret' => env('SHOPIFY_API_SECRET', 'ed2e6e34880092ed7521bd5a0ae362f9'),
+	 'api_secret' => env('SHOPIFY_API_SECRET', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -198,7 +198,7 @@ return [
     |
     */
 // read_all_orders
-    'api_scopes' => env('SHOPIFY_API_SCOPES', 'read_customers,write_customers,read_orders,write_orders,read_products,write_products,write_script_tags'),
+    'api_scopes' => env('SHOPIFY_API_SCOPES', ''),
 
     /*
     |--------------------------------------------------------------------------
